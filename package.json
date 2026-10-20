@@ -1,18 +1,15 @@
 {
-  "name": "fireworks-monorepo",
+  "name": "fireworks-frontend",
   "version": "1.0.0",
   "private": true,
   "workspaces": [
-    "packages/*",
-    "apps/*"
+    "apps/web"
   ],
   "scripts": {
-    "dev": "npm run dev --workspaces",
-    "dev:api": "npm run dev --workspace=apps/api",
+    "dev": "npm run dev --workspace=apps/web",
     "dev:web": "npm run dev --workspace=apps/web",
-    "build": "npm run build --workspaces",
-    "start": "npm start --workspace=apps/api",
-    "test": "npm run test --workspaces"
+    "build": "npm run build --workspace=apps/web",
+    "preview": "npm run preview --workspace=apps/web"
   },
   "devDependencies": {
     "typescript": "^5.6.3"

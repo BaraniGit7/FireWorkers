@@ -1,13 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState } from "react";
+import { AuthUser, HARDCODED_USERS, HARDCODED_CUSTOMERS, CustomerRecord } from "../data/index.js";
 
-export interface AuthUser {
-  id: string;
-  email: string;
-  role: "CUSTOMER" | "SELLER" | "ADMIN";
-  fullName: string;
-  phone?: string;
-  sellerStatus?: string;
-}
+export type { AuthUser };
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -20,6 +14,7 @@ interface AuthContextType {
   authModalTab: "login" | "register";
   openAuthModal: (tab?: "login" | "register") => void;
   closeAuthModal: () => void;
+  switchUser: (role: "SUPERADMIN" | "SELLER" | "CUSTOMER", userId?: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -28,17 +23,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<AuthUser | null>(() => {
     try {
       const saved = localStorage.getItem("fck_auth_user");
-      return saved ? JSON.parse(saved) : null;
+      return saved ? JSON.parse(saved) : HARDCODED_USERS[0];
     } catch {
-      return null;
+      return HARDCODED_USERS[0];
     }
   });
 
   const [token, setToken] = useState<string | null>(() => {
     try {
-      return localStorage.getItem("fck_auth_token") || null;
+      return localStorage.getItem("fck_auth_token") || "demo-jwt-token";
     } catch {
-      return null;
+      return "demo-jwt-token";
     }
   });
 
@@ -54,96 +49,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsAuthModalOpen(false);
   };
 
-  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
-    try {
-      const res = await fetch("/api/v1/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
-      });
+  const login = async (email: string, _password: string): Promise<{ success: boolean; error?: string }> => {
+    const cleanEmail = email.toLowerCase().trim();
 
-      const data = await res.json();
+    // Check predefined structured demo users
+    const found = HARDCODED_USERS.find((u) => u.email.toLowerCase() === cleanEmail);
 
-      if (!res.ok || !data.success) {
-        // Fallback demo credentials if testing without backend database active
-        if (email.toLowerCase().includes("admin") && password.length >= 6) {
-          const demoAdmin: AuthUser = {
-            id: "demo-admin-id",
-            email: "admin@fireworks.com",
-            role: "ADMIN",
-            fullName: "System Compliance Administrator"
-          };
-          setUser(demoAdmin);
-          setToken("demo-admin-jwt-token");
-          localStorage.setItem("fck_auth_user", JSON.stringify(demoAdmin));
-          localStorage.setItem("fck_auth_token", "demo-admin-jwt-token");
-          closeAuthModal();
-          return { success: true };
-        }
-        if (email.toLowerCase().includes("seller") && password.length >= 6) {
-          const demoSeller: AuthUser = {
-            id: "demo-seller-id",
-            email: "seller.sivakasi@fireworks.com",
-            role: "SELLER",
-            fullName: "Sivakasi Sparkles Fireworks Ltd",
-            sellerStatus: "APPROVED"
-          };
-          setUser(demoSeller);
-          setToken("demo-seller-jwt-token");
-          localStorage.setItem("fck_auth_user", JSON.stringify(demoSeller));
-          localStorage.setItem("fck_auth_token", "demo-seller-jwt-token");
-          closeAuthModal();
-          return { success: true };
-        }
-        if (email.toLowerCase().includes("customer") && password.length >= 6) {
-          const demoCustomer: AuthUser = {
-            id: "demo-customer-id",
-            email: "customer@fireworks.com",
-            role: "CUSTOMER",
-            fullName: "Rahul Sharma (Verified 18+)"
-          };
-          setUser(demoCustomer);
-          setToken("demo-customer-jwt-token");
-          localStorage.setItem("fck_auth_user", JSON.stringify(demoCustomer));
-          localStorage.setItem("fck_auth_token", "demo-customer-jwt-token");
-          closeAuthModal();
-          return { success: true };
-        }
-
-        return { success: false, error: data?.error?.message || "Invalid credentials. Please check email and password." };
-      }
-
-      const loggedUser: AuthUser = {
-        id: data.data.user.id,
-        email: data.data.user.email,
-        role: data.data.user.role,
-        fullName: data.data.user.customerProfile?.fullName || data.data.user.email.split("@")[0],
-        phone: data.data.user.phone,
-        sellerStatus: data.data.user.sellerProfile?.verificationStatus
-      };
-
-      setUser(loggedUser);
-      setToken(data.data.accessToken);
-      localStorage.setItem("fck_auth_user", JSON.stringify(loggedUser));
-      localStorage.setItem("fck_auth_token", data.data.accessToken);
+    if (found) {
+      setUser(found);
+      setToken("token-" + found.id);
+      localStorage.setItem("fck_auth_user", JSON.stringify(found));
+      localStorage.setItem("fck_auth_token", "token-" + found.id);
       closeAuthModal();
       return { success: true };
-    } catch (err: any) {
-      // Offline fallback for seamless dev experience
-      if (email && password) {
-        const fallbackUser: AuthUser = {
-          id: "local-user-" + Date.now(),
-          email,
-          role: email.includes("admin") ? "ADMIN" : email.includes("seller") ? "SELLER" : "CUSTOMER",
-          fullName: email.split("@")[0].toUpperCase()
-        };
-        setUser(fallbackUser);
-        localStorage.setItem("fck_auth_user", JSON.stringify(fallbackUser));
-        closeAuthModal();
-        return { success: true };
-      }
-      return { success: false, error: "Network error connecting to API." };
     }
+
+    // Dynamic role mapping if user enters any email
+    const inferredRole = cleanEmail.includes("super")
+      ? "SUPERADMIN"
+      : cleanEmail.includes("seller") || cleanEmail.includes("admin")
+      ? "SELLER"
+      : "CUSTOMER";
+
+    const customUser: AuthUser = {
+      id: "user-" + Date.now(),
+      email: cleanEmail,
+      role: inferredRole,
+      fullName: cleanEmail.split("@")[0].toUpperCase()
+    };
+
+    HARDCODED_USERS.push(customUser);
+    setUser(customUser);
+    setToken("token-" + customUser.id);
+    localStorage.setItem("fck_auth_user", JSON.stringify(customUser));
+    localStorage.setItem("fck_auth_token", "token-" + customUser.id);
+    closeAuthModal();
+    return { success: true };
   };
 
   const register = async (inputData: {
@@ -153,41 +94,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     fullName: string;
     role?: string;
   }): Promise<{ success: boolean; error?: string }> => {
-    try {
-      const res = await fetch("/api/v1/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(inputData)
-      });
+    const role = (inputData.role as any) || "CUSTOMER";
+    const newUser: AuthUser = {
+      id: "user-reg-" + Date.now(),
+      email: inputData.email.toLowerCase().trim(),
+      role: role,
+      fullName: `${inputData.fullName} (👤 வாடிக்கையாளர் 18+)`,
+      phone: inputData.phone
+    };
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        return { success: false, error: data?.error?.message || "Registration failed. Please check inputs." };
-      }
+    HARDCODED_USERS.push(newUser);
 
-      const registeredUser: AuthUser = {
-        id: data.data.user.id,
-        email: data.data.user.email,
-        role: data.data.user.role,
-        fullName: data.data.user.customerProfile?.fullName || inputData.fullName,
-        phone: data.data.user.phone
+    // If customer, also register in customers list
+    if (role === "CUSTOMER") {
+      const newCustRecord: CustomerRecord = {
+        id: "cust-reg-" + Date.now(),
+        fullName: inputData.fullName,
+        email: newUser.email,
+        phone: inputData.phone,
+        ageVerified: true,
+        address: "வாடிக்கையாளர் பதிவுசெய்த முகவரி",
+        registeredAt: new Date().toISOString(),
+        addedBy: "SELF_REGISTRATION"
       };
-
-      setUser(registeredUser);
-      setToken(data.data.accessToken);
-      localStorage.setItem("fck_auth_user", JSON.stringify(registeredUser));
-      localStorage.setItem("fck_auth_token", data.data.accessToken);
-      closeAuthModal();
-      return { success: true };
-    } catch (err: any) {
-      return { success: false, error: "Network connection error. Please try again." };
+      HARDCODED_CUSTOMERS.push(newCustRecord);
+      try {
+        const stored = localStorage.getItem("fck_customers");
+        const list = stored ? JSON.parse(stored) : [];
+        localStorage.setItem("fck_customers", JSON.stringify([newCustRecord, ...list]));
+      } catch {}
     }
+
+    setUser(newUser);
+    setToken("token-" + newUser.id);
+    localStorage.setItem("fck_auth_user", JSON.stringify(newUser));
+    localStorage.setItem("fck_auth_token", "token-" + newUser.id);
+    closeAuthModal();
+    return { success: true };
+  };
+
+  const switchUser = (role: "SUPERADMIN" | "SELLER" | "CUSTOMER", userId?: string) => {
+    let target = userId ? HARDCODED_USERS.find((u) => u.id === userId) : null;
+    if (!target) {
+      target = HARDCODED_USERS.find((u) => u.role === role) || HARDCODED_USERS[0];
+    }
+    setUser(target);
+    setToken("token-" + target.id);
+    localStorage.setItem("fck_auth_user", JSON.stringify(target));
+    localStorage.setItem("fck_auth_token", "token-" + target.id);
   };
 
   const logout = () => {
-    try {
-      fetch("/api/v1/auth/logout", { method: "POST" });
-    } catch {}
     setUser(null);
     setToken(null);
     localStorage.removeItem("fck_auth_user");
@@ -206,7 +163,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAuthModalOpen,
         authModalTab,
         openAuthModal,
-        closeAuthModal
+        closeAuthModal,
+        switchUser
       }}
     >
       {children}

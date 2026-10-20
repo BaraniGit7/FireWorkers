@@ -1,18 +1,34 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box } from "@mui/material";
 import { AppThemeProvider, useThemeMode } from "./context/ThemeContext.js";
 import { LanguageProvider } from "./context/LanguageContext.js";
-import { AuthProvider } from "./context/AuthContext.js";
+import { AuthProvider, useAuth } from "./context/AuthContext.js";
 import { CartProvider } from "./context/CartContext.js";
+import { MarketplaceProvider, useMarketplace } from "./context/MarketplaceContext.js";
 import { Navbar } from "./components/Navbar.js";
 import { CartDrawer } from "./components/CartDrawer.js";
 import { AgeGateModal } from "./components/AgeGateModal.js";
 import { AuthModal } from "./components/AuthModal.js";
 import { Storefront } from "./pages/Storefront.js";
+import { SellerPortal } from "./pages/seller/SellerPortal.js";
+import { AdminPortal } from "./pages/admin/AdminPortal.js";
 
 const MainLayout: React.FC = () => {
   const [ageGateOpen, setAgeGateOpen] = useState(false);
   const { mode } = useThemeMode();
+  const { currentView, setCurrentView } = useMarketplace();
+  const { user } = useAuth();
+
+  // Role-based auto-navigation when active role changes
+  useEffect(() => {
+    if (user?.role === "SUPERADMIN" || user?.role === "ADMIN") {
+      setCurrentView("admin");
+    } else if (user?.role === "SELLER") {
+      setCurrentView("seller");
+    } else if (user?.role === "CUSTOMER") {
+      setCurrentView("storefront");
+    }
+  }, [user?.role]);
 
   return (
     <Box
@@ -29,7 +45,10 @@ const MainLayout: React.FC = () => {
         onSearchChange={() => {}}
       />
 
-      <Storefront />
+      {/* Dynamic Portal Routing */}
+      {currentView === "storefront" && <Storefront />}
+      {currentView === "seller" && <SellerPortal />}
+      {currentView === "admin" && <AdminPortal />}
 
       <CartDrawer />
 
@@ -50,7 +69,9 @@ export const App: React.FC = () => {
       <AppThemeProvider>
         <AuthProvider>
           <CartProvider>
-            <MainLayout />
+            <MarketplaceProvider>
+              <MainLayout />
+            </MarketplaceProvider>
           </CartProvider>
         </AuthProvider>
       </AppThemeProvider>

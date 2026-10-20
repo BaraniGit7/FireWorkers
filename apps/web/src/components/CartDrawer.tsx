@@ -8,7 +8,8 @@ import {
   Divider,
   List,
   ListItem,
-  Chip
+  Chip,
+  Alert
 } from "@mui/material";
 import {
   X,
@@ -22,6 +23,8 @@ import {
 } from "lucide-react";
 import { useCart } from "../context/CartContext.js";
 import { useLanguage } from "../context/LanguageContext.js";
+import { useMarketplace } from "../context/MarketplaceContext.js";
+import { useAuth } from "../context/AuthContext.js";
 
 export const CartDrawer: React.FC = () => {
   const {
@@ -40,13 +43,20 @@ export const CartDrawer: React.FC = () => {
   } = useCart();
 
   const { t } = useLanguage();
+  const { user, switchUser } = useAuth();
+  const { createOrderFromCart, isKillSwitchActive, setCurrentView } = useMarketplace();
   const [reservationPlaced, setReservationPlaced] = useState(false);
   const [pickupOtp, setPickupOtp] = useState<string | null>(null);
 
   const handleCreateReservation = () => {
-    // Generate secure 6-digit collection OTP for compliant depot collection
-    const randomOtp = Math.floor(100000 + Math.random() * 900000).toString();
-    setPickupOtp(randomOtp);
+    if (isKillSwitchActive) return;
+    const order = createOrderFromCart(
+      items,
+      selectedDepot,
+      user?.fullName || "Rahul Sharma (Verified 18+)",
+      user?.phone || "9876543212"
+    );
+    setPickupOtp(order.pickupPinOtp);
     setReservationPlaced(true);
   };
 
@@ -86,8 +96,67 @@ export const CartDrawer: React.FC = () => {
         </IconButton>
       </Box>
 
-      {/* Reservation Placed Confirmation State */}
-      {reservationPlaced ? (
+      {/* Restriction for Non-Customers */}
+      {user && user.role !== "CUSTOMER" ? (
+        <Box sx={{ p: 4, textAlign: "center", my: "auto" }}>
+          <Box sx={{ fontSize: "3.2rem", mb: 2 }}>🔒</Box>
+          <Typography variant="h6" sx={{ fontWeight: 800, mb: 1 }}>
+            வாடிக்கையாளர்களுக்கு மட்டுமே கார்ட் அணுகல்
+          </Typography>
+          <Typography variant="body2" sx={{ color: "text.secondary", mb: 3 }}>
+            நீங்கள் {user.role === "SUPERADMIN" ? "👑 முதன்மை நிர்வாகி (SuperAdmin)" : "🏭 கம்பெனி அட்மின் (Seller)"} ஆக உள்ளீர்கள். தனிநபர் முன்பதிவு கார்ட் 18+ வயது சான்றளிக்கப்பட்ட வாடிக்கையாளர்களுக்கு மட்டுமே.
+          </Typography>
+
+          <Box sx={{ p: 2, mb: 3, backgroundColor: "rgba(245, 158, 11, 0.08)", border: "1px dashed #f59e0b", borderRadius: "12px", textAlign: "left" }}>
+            <Typography variant="caption" sx={{ fontWeight: 700, color: "#f59e0b", display: "block" }}>
+              💡 நிர்வாகிகளுக்கான ஆர்டர் வசதி:
+            </Typography>
+            <Typography variant="caption" sx={{ color: "text.secondary", mt: 0.5, display: "block" }}>
+              வாடிக்கையாளருக்கு ஆர்டர் பதிவு செய்ய உங்கள் விற்பனையாளர் போர்ட்டலில் உள்ள 'வாடிக்கையாளருக்கு ஆர்டர் பதிவு' கருவியைப் பயன்படுத்தவும்.
+            </Typography>
+          </Box>
+
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+            {user.role === "SELLER" && (
+              <Button
+                variant="contained"
+                color="success"
+                onClick={() => {
+                  setIsCartOpen(false);
+                  setCurrentView("seller");
+                }}
+                sx={{ fontWeight: 800, py: 1.2, backgroundColor: "#10b981" }}
+              >
+                விற்பனையாளர் மையத்திற்கு செல்க
+              </Button>
+            )}
+            {user.role === "SUPERADMIN" && (
+              <Button
+                variant="contained"
+                color="error"
+                onClick={() => {
+                  setIsCartOpen(false);
+                  setCurrentView("admin");
+                }}
+                sx={{ fontWeight: 800, py: 1.2 }}
+              >
+                முதன்மை அட்மின் கன்சோல்
+              </Button>
+            )}
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() => {
+                switchUser("CUSTOMER");
+                setIsCartOpen(false);
+              }}
+              sx={{ fontWeight: 700 }}
+            >
+              வாடிக்கையாளராக மாறுக (Switch to Customer)
+            </Button>
+          </Box>
+        </Box>
+      ) : reservationPlaced ? (
         <Box sx={{ p: 3, textAlign: "center", my: "auto" }}>
           <Box
             sx={{
@@ -278,20 +347,27 @@ export const CartDrawer: React.FC = () => {
                 </Typography>
               </Box>
 
+              {isKillSwitchActive && (
+                <Alert severity="error" sx={{ mb: 2, fontSize: "0.8rem", fontWeight: 600 }}>
+                  EMERGENCY FREEZE ACTIVE: Checkout has been administratively halted pursuant to regulatory directives.
+                </Alert>
+              )}
+
               <Button
                 variant="contained"
-                color="primary"
+                color={isKillSwitchActive ? "inherit" : "primary"}
                 fullWidth
                 size="large"
                 startIcon={<Lock size={18} />}
                 onClick={handleCreateReservation}
+                disabled={isKillSwitchActive}
                 sx={{
                   py: 1.4,
                   fontSize: "1rem",
                   fontWeight: 800
                 }}
               >
-                {t("reserveAtDepotBtn")}
+                {isKillSwitchActive ? "Checkouts Temporarily Frozen" : t("reserveAtDepotBtn")}
               </Button>
             </Box>
           )}

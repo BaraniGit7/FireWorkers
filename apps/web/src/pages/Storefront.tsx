@@ -9,7 +9,8 @@ import {
   InputAdornment,
   Card,
   CardContent,
-  Button
+  Button,
+  Alert
 } from "@mui/material";
 import {
   Search,
@@ -23,12 +24,18 @@ import {
 import { INITIAL_PRODUCTS, DemoProduct } from "../api/client.js";
 import { ProductCard } from "../components/ProductCard.js";
 import { useLanguage } from "../context/LanguageContext.js";
+import { useMarketplace } from "../context/MarketplaceContext.js";
+import { useAuth } from "../context/AuthContext.js";
 
 export const Storefront: React.FC = () => {
   const { t } = useLanguage();
+  const { approvedProducts, setCurrentView } = useMarketplace();
+  const { user, switchUser } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [maxSound, setMaxSound] = useState<number | null>(null);
+
+  const isCustomer = !user || user.role === "CUSTOMER";
 
   const categories = [
     { label: t("catAll"), value: "all" },
@@ -40,7 +47,7 @@ export const Storefront: React.FC = () => {
     { label: t("catGiftBoxes"), value: "gift-boxes" }
   ];
 
-  const filteredProducts = INITIAL_PRODUCTS.filter((prod) => {
+  const filteredProducts = approvedProducts.filter((prod) => {
     const matchesCat = selectedCategory === "all" || prod.categorySlug === selectedCategory;
     const matchesSearch =
       prod.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -64,6 +71,62 @@ export const Storefront: React.FC = () => {
         }}
       >
         <Container maxWidth="lg">
+          {!isCustomer && (
+            <Alert
+              severity="warning"
+              sx={{
+                mb: 3,
+                textAlign: "left",
+                borderRadius: "12px",
+                border: "1px solid #f59e0b",
+                "& .MuiAlert-message": { width: "100%" }
+              }}
+            >
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 1 }}>
+                <Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+                    🔒 வாடிக்கையாளர்களுக்கு (18+) மட்டுமே நேரடி கடை முகப்பு மற்றும் கார்ட் அணுகல்
+                  </Typography>
+                  <Typography variant="caption" sx={{ display: "block", color: "text.secondary" }}>
+                    நீங்கள் {user?.role === "SUPERADMIN" ? "👑 முதன்மை நிர்வாகி (SuperAdmin)" : "🏭 கம்பெனி அட்மின் (Seller)"} ஆக உள்ளீர்கள். வாடிக்கையாளர்களுக்கு ஆர்டர் பதிவு செய்ய உங்கள் போர்ட்டலைப் பயன்படுத்தலாம்.
+                  </Typography>
+                </Box>
+                <Box sx={{ display: "flex", gap: 1 }}>
+                  {user?.role === "SELLER" && (
+                    <Button
+                      size="small"
+                      variant="contained"
+                      color="success"
+                      onClick={() => setCurrentView("seller")}
+                      sx={{ fontWeight: 800, fontSize: "0.75rem" }}
+                    >
+                      விற்பனையாளர் மையத்திற்கு செல்க
+                    </Button>
+                  )}
+                  {user?.role === "SUPERADMIN" && (
+                    <Button
+                      size="small"
+                      variant="contained"
+                      color="error"
+                      onClick={() => setCurrentView("admin")}
+                      sx={{ fontWeight: 800, fontSize: "0.75rem" }}
+                    >
+                      முதன்மை அட்மின் கன்சோல்
+                    </Button>
+                  )}
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => switchUser("CUSTOMER")}
+                    sx={{ fontWeight: 700, fontSize: "0.75rem" }}
+                  >
+                    வாடிக்கையாளராக மாறுக
+                  </Button>
+                </Box>
+              </Box>
+            </Alert>
+          )}
+
           <Chip
             icon={<Sparkles size={14} color="#f59e0b" />}
             label={t("festiveBadge")}

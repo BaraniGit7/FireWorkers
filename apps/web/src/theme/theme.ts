@@ -35,36 +35,58 @@ export const getAppTheme = (mode: "light" | "dark") => {
       divider: isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.08)"
     },
     typography: {
-      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+      fontFamily: "'Noto Sans Tamil', 'Outfit', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
       h1: {
-        fontFamily: "'Outfit', sans-serif",
+        fontFamily: "'Noto Sans Tamil', 'Outfit', sans-serif",
         fontWeight: 800,
-        letterSpacing: "-0.02em"
+        lineHeight: 1.4
       },
       h2: {
-        fontFamily: "'Outfit', sans-serif",
+        fontFamily: "'Noto Sans Tamil', 'Outfit', sans-serif",
         fontWeight: 700,
-        letterSpacing: "-0.01em"
+        lineHeight: 1.4
       },
       h3: {
-        fontFamily: "'Outfit', sans-serif",
-        fontWeight: 700
+        fontFamily: "'Noto Sans Tamil', 'Outfit', sans-serif",
+        fontWeight: 700,
+        lineHeight: 1.45
       },
       h4: {
-        fontFamily: "'Outfit', sans-serif",
-        fontWeight: 600
+        fontFamily: "'Noto Sans Tamil', 'Outfit', sans-serif",
+        fontWeight: 600,
+        lineHeight: 1.5
       },
       h5: {
-        fontFamily: "'Outfit', sans-serif",
-        fontWeight: 600
+        fontFamily: "'Noto Sans Tamil', 'Outfit', sans-serif",
+        fontWeight: 600,
+        lineHeight: 1.55
       },
       h6: {
-        fontFamily: "'Outfit', sans-serif",
-        fontWeight: 600
+        fontFamily: "'Noto Sans Tamil', 'Outfit', sans-serif",
+        fontWeight: 600,
+        lineHeight: 1.55
+      },
+      body1: {
+        fontFamily: "'Noto Sans Tamil', 'Inter', sans-serif",
+        lineHeight: 1.75
+      },
+      body2: {
+        fontFamily: "'Noto Sans Tamil', 'Inter', sans-serif",
+        lineHeight: 1.7
       },
       button: {
+        fontFamily: "'Noto Sans Tamil', 'Outfit', sans-serif",
         textTransform: "none",
-        fontWeight: 600
+        fontWeight: 600,
+        lineHeight: 1.5
+      },
+      caption: {
+        fontFamily: "'Noto Sans Tamil', 'Inter', sans-serif",
+        lineHeight: 1.6
+      },
+      overline: {
+        fontFamily: "'Noto Sans Tamil', 'Inter', sans-serif",
+        lineHeight: 1.6
       }
     },
     shape: {
