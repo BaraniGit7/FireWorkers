@@ -17,28 +17,28 @@ import {
   MapPin,
   Clock,
   Sparkles,
-  Flame,
   Volume2,
-  CheckCircle2,
-  HelpCircle
+  CheckCircle2
 } from "lucide-react";
 import { INITIAL_PRODUCTS, DemoProduct } from "../api/client.js";
 import { ProductCard } from "../components/ProductCard.js";
-
-const CATEGORIES = [
-  { label: "All Fireworks", value: "all" },
-  { label: "Sparklers", value: "sparklers" },
-  { label: "Ground Chakkars", value: "ground-chakkars" },
-  { label: "Flower Pots (Anar)", value: "flower-pots" },
-  { label: "Sound Crackers", value: "sound-crackers" },
-  { label: "Aerial Shells & Shots", value: "aerial-shells" },
-  { label: "Family Gift Boxes", value: "gift-boxes" }
-];
+import { useLanguage } from "../context/LanguageContext.js";
 
 export const Storefront: React.FC = () => {
+  const { t } = useLanguage();
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [maxSound, setMaxSound] = useState<number | null>(null);
+
+  const categories = [
+    { label: t("catAll"), value: "all" },
+    { label: t("catSparklers"), value: "sparklers" },
+    { label: t("catChakkars"), value: "ground-chakkars" },
+    { label: t("catFlowerPots"), value: "flower-pots" },
+    { label: t("catSound"), value: "sound-crackers" },
+    { label: t("catAerial"), value: "aerial-shells" },
+    { label: t("catGiftBoxes"), value: "gift-boxes" }
+  ];
 
   const filteredProducts = INITIAL_PRODUCTS.filter((prod) => {
     const matchesCat = selectedCategory === "all" || prod.categorySlug === selectedCategory;
@@ -59,17 +59,17 @@ export const Storefront: React.FC = () => {
           pt: { xs: 6, md: 10 },
           pb: { xs: 8, md: 12 },
           background: "radial-gradient(ellipse at 50% 0%, rgba(245, 158, 11, 0.18) 0%, rgba(10, 15, 29, 0) 75%)",
-          borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
+          borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
           textAlign: "center"
         }}
       >
         <Container maxWidth="lg">
           <Chip
             icon={<Sparkles size={14} color="#f59e0b" />}
-            label="Diwali 2026 Statutory Compliant Platform"
+            label={t("festiveBadge")}
             sx={{
               backgroundColor: "rgba(245, 158, 11, 0.12)",
-              color: "#fbbf24",
+              color: "primary.main",
               fontWeight: 700,
               fontSize: "0.8rem",
               border: "1px solid rgba(245, 158, 11, 0.3)",
@@ -81,41 +81,44 @@ export const Storefront: React.FC = () => {
             variant="h2"
             sx={{
               fontWeight: 900,
-              fontFamily: "'Outfit', sans-serif",
-              fontSize: { xs: "2.4rem", sm: "3.5rem", md: "4.2rem" },
-              lineHeight: 1.1,
+              fontFamily: "'Outfit', 'Noto Sans Tamil', sans-serif",
+              fontSize: { xs: "2.3rem", sm: "3.4rem", md: "4.1rem" },
+              lineHeight: 1.15,
               mb: 2.5,
-              background: "linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #f59e0b 100%)",
+              background: (theme) =>
+                theme.palette.mode === "dark"
+                  ? "linear-gradient(135deg, #ffffff 0%, #cbd5e1 50%, #f59e0b 100%)"
+                  : "linear-gradient(135deg, #0f172a 0%, #334155 50%, #d97706 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent"
             }}
           >
-            Safe, Certified Green Crackers.
+            {t("heroTitle1")}
             <br />
-            <Box component="span" sx={{ color: "#f59e0b", WebkitTextFillColor: "initial" }}>
-              Direct from Licensed Hubs.
+            <Box component="span" sx={{ color: "primary.main", WebkitTextFillColor: "initial" }}>
+              {t("heroTitle2")}
             </Box>
           </Typography>
 
           <Typography
             variant="body1"
             sx={{
-              color: "#94a3b8",
-              fontSize: { xs: "1rem", md: "1.15rem" },
+              color: "text.secondary",
+              fontSize: { xs: "0.98rem", md: "1.12rem" },
               maxWidth: 720,
               mx: "auto",
               mb: 4,
               lineHeight: 1.6
             }}
           >
-            Supreme Court mandated <strong>CSIR-NEERI certified Green Crackers</strong> with zero toxic Barium salts. Verified PESO storage, click-and-collect fulfillment, and atomic 15-minute checkout reservation.
+            {t("heroSubtitle")}
           </Typography>
 
           {/* Search Input Bar */}
           <Box sx={{ maxWidth: 640, mx: "auto", mb: 2 }}>
             <TextField
               fullWidth
-              placeholder="Search green sparklers, flowerpots, chakkars, low-smoke shells..."
+              placeholder={t("searchPlaceholder")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               InputProps={{
@@ -125,13 +128,16 @@ export const Storefront: React.FC = () => {
                   </InputAdornment>
                 ),
                 sx: {
-                  backgroundColor: "rgba(18, 26, 47, 0.8)",
+                  backgroundColor: "background.paper",
                   borderRadius: "14px",
-                  border: "1px solid rgba(255, 255, 255, 0.15)",
-                  color: "#f8fafc",
+                  border: (theme) => `1px solid ${theme.palette.divider}`,
+                  color: "text.primary",
                   fontSize: "1rem",
                   py: 0.5,
-                  boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.4)",
+                  boxShadow: (theme) =>
+                    theme.palette.mode === "dark"
+                      ? "0 10px 25px -5px rgba(0, 0, 0, 0.4)"
+                      : "0 10px 25px -5px rgba(0, 0, 0, 0.08)",
                   "& fieldset": { border: "none" }
                 }
               }}
@@ -156,7 +162,7 @@ export const Storefront: React.FC = () => {
               "&::-webkit-scrollbar": { display: "none" }
             }}
           >
-            {CATEGORIES.map((cat) => {
+            {categories.map((cat) => {
               const isSelected = selectedCategory === cat.value;
               return (
                 <Chip
@@ -170,13 +176,12 @@ export const Storefront: React.FC = () => {
                     fontSize: "0.85rem",
                     fontWeight: 700,
                     borderRadius: "10px",
-                    backgroundColor: isSelected ? "#f59e0b" : "rgba(255, 255, 255, 0.04)",
-                    color: isSelected ? "#000000" : "#cbd5e1",
-                    border: isSelected ? "1px solid #f59e0b" : "1px solid rgba(255, 255, 255, 0.08)",
-                    transition: "all 0.2s ease",
-                    "&:hover": {
-                      backgroundColor: isSelected ? "#fbbf24" : "rgba(255, 255, 255, 0.08)"
-                    }
+                    backgroundColor: isSelected
+                      ? "primary.main"
+                      : (theme) => (theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.04)"),
+                    color: isSelected ? "#ffffff" : "text.secondary",
+                    border: (theme) => (isSelected ? "1px solid transparent" : `1px solid ${theme.palette.divider}`),
+                    transition: "all 0.2s ease"
                   }}
                 />
               );
@@ -185,76 +190,76 @@ export const Storefront: React.FC = () => {
 
           {/* Sound Decibel Quick Filter */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 2, flexWrap: "wrap" }}>
-            <Typography variant="caption" sx={{ color: "#94a3b8", fontWeight: 700, mr: 1, textTransform: "uppercase" }}>
-              Decibel Cap:
+            <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, mr: 1, textTransform: "uppercase" }}>
+              {t("decibelCap")}
             </Typography>
             <Chip
               size="small"
-              label="All Sounds"
+              label={t("soundAll")}
               clickable
               onClick={() => setMaxSound(null)}
               sx={{
                 fontSize: "0.75rem",
                 fontWeight: 600,
                 backgroundColor: maxSound === null ? "rgba(245, 158, 11, 0.2)" : "transparent",
-                color: maxSound === null ? "#f59e0b" : "#94a3b8",
-                border: "1px solid rgba(255, 255, 255, 0.1)"
+                color: maxSound === null ? "primary.main" : "text.secondary",
+                border: (theme) => `1px solid ${theme.palette.divider}`
               }}
             />
             <Chip
               size="small"
-              label="Silent (0 dB)"
+              label={t("soundSilent")}
               clickable
               onClick={() => setMaxSound(0)}
               sx={{
                 fontSize: "0.75rem",
                 fontWeight: 600,
                 backgroundColor: maxSound === 0 ? "rgba(16, 185, 129, 0.2)" : "transparent",
-                color: maxSound === 0 ? "#10b981" : "#94a3b8",
-                border: "1px solid rgba(255, 255, 255, 0.1)"
+                color: maxSound === 0 ? "secondary.main" : "text.secondary",
+                border: (theme) => `1px solid ${theme.palette.divider}`
               }}
             />
             <Chip
               size="small"
-              label="Low Noise (≤ 45 dB)"
+              label={t("soundLow")}
               clickable
               onClick={() => setMaxSound(45)}
               sx={{
                 fontSize: "0.75rem",
                 fontWeight: 600,
                 backgroundColor: maxSound === 45 ? "rgba(16, 185, 129, 0.2)" : "transparent",
-                color: maxSound === 45 ? "#10b981" : "#94a3b8",
-                border: "1px solid rgba(255, 255, 255, 0.1)"
+                color: maxSound === 45 ? "secondary.main" : "text.secondary",
+                border: (theme) => `1px solid ${theme.palette.divider}`
               }}
             />
             <Chip
               size="small"
-              label="Legal Max (≤ 125 dB)"
+              label={t("soundLegalMax")}
               clickable
               onClick={() => setMaxSound(125)}
               sx={{
                 fontSize: "0.75rem",
                 fontWeight: 600,
                 backgroundColor: maxSound === 125 ? "rgba(245, 158, 11, 0.2)" : "transparent",
-                color: maxSound === 125 ? "#f59e0b" : "#94a3b8",
-                border: "1px solid rgba(255, 255, 255, 0.1)"
+                color: maxSound === 125 ? "primary.main" : "text.secondary",
+                border: (theme) => `1px solid ${theme.palette.divider}`
               }}
             />
           </Box>
         </Box>
 
         {/* Product Grid */}
-        <Typography variant="h5" sx={{ fontWeight: 800, fontFamily: "'Outfit', sans-serif", mb: 2.5, color: "#f8fafc" }}>
-          Certified Green Cracker Catalog ({filteredProducts.length})
+        <Typography variant="h5" sx={{ fontWeight: 800, fontFamily: "'Outfit', 'Noto Sans Tamil', sans-serif", mb: 2.5, color: "text.primary" }}>
+          {t("catalogTitle")} ({filteredProducts.length})
         </Typography>
 
         {filteredProducts.length === 0 ? (
-          <Box sx={{ textAlign: "center", py: 8, backgroundColor: "rgba(255, 255, 255, 0.02)", borderRadius: "16px" }}>
-            <Typography variant="h6" sx={{ color: "#cbd5e1", mb: 1 }}>
-              No certified fireworks match your filter criteria.
+          <Box sx={{ textAlign: "center", py: 8, backgroundColor: "background.paper", borderRadius: "16px", border: (theme) => `1px solid ${theme.palette.divider}` }}>
+            <Typography variant="h6" sx={{ color: "text.secondary", mb: 1 }}>
+              {t("noProducts")}
             </Typography>
             <Button variant="outlined" color="primary" onClick={() => { setSelectedCategory("all"); setSearchTerm(""); setMaxSound(null); }}>
-              Reset Filters
+              {t("resetFilters")}
             </Button>
           </Box>
         ) : (
@@ -268,9 +273,9 @@ export const Storefront: React.FC = () => {
         )}
 
         {/* 4 Pillars of Regulatory Safety */}
-        <Box sx={{ mt: 10, pt: 8, borderTop: "1px solid rgba(255, 255, 255, 0.08)" }}>
-          <Typography variant="h4" sx={{ fontWeight: 800, textAlign: "center", mb: 5, fontFamily: "'Outfit', sans-serif" }}>
-            Why FireWorks is India's Safest Platform
+        <Box sx={{ mt: 10, pt: 8, borderTop: (theme) => `1px solid ${theme.palette.divider}` }}>
+          <Typography variant="h4" sx={{ fontWeight: 800, textAlign: "center", mb: 5, fontFamily: "'Outfit', 'Noto Sans Tamil', sans-serif" }}>
+            {t("whySafeTitle")}
           </Typography>
 
           <Grid container spacing={3}>
@@ -281,10 +286,10 @@ export const Storefront: React.FC = () => {
                     <ShieldCheck size={24} />
                   </Box>
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-                    CSIR-NEERI Certified
+                    {t("pillar1Title")}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: "#94a3b8", lineHeight: 1.5 }}>
-                    Every batch features a scannable QR verification code. Particulate emissions are cut by 30-35%.
+                  <Typography variant="body2" sx={{ color: "text.secondary", lineHeight: 1.5 }}>
+                    {t("pillar1Desc")}
                   </Typography>
                 </CardContent>
               </Card>
@@ -297,10 +302,10 @@ export const Storefront: React.FC = () => {
                     <MapPin size={24} />
                   </Box>
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-                    Licensed Depot Pickup
+                    {t("pillar2Title")}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: "#94a3b8", lineHeight: 1.5 }}>
-                    Zero illegal courier transit. Secure collection at PESO-licensed Form LE-5 godowns with physical ID proof.
+                  <Typography variant="body2" sx={{ color: "text.secondary", lineHeight: 1.5 }}>
+                    {t("pillar2Desc")}
                   </Typography>
                 </CardContent>
               </Card>
@@ -313,10 +318,10 @@ export const Storefront: React.FC = () => {
                     <Clock size={24} />
                   </Box>
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-                    15-Min Atomic Locks
+                    {t("pillar3Title")}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: "#94a3b8", lineHeight: 1.5 }}>
-                    Zero overselling. Inventory is locked at checkout so you never face unfulfillable depot orders.
+                  <Typography variant="body2" sx={{ color: "text.secondary", lineHeight: 1.5 }}>
+                    {t("pillar3Desc")}
                   </Typography>
                 </CardContent>
               </Card>
@@ -329,10 +334,10 @@ export const Storefront: React.FC = () => {
                     <CheckCircle2 size={24} />
                   </Box>
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
-                    100% Barium Free
+                    {t("pillar4Title")}
                   </Typography>
-                  <Typography variant="body2" sx={{ color: "#94a3b8", lineHeight: 1.5 }}>
-                    Strict Supreme Court compliance. Banned formulations (Barium, Antimony, Lithium, Lead) are permanently blacklisted.
+                  <Typography variant="body2" sx={{ color: "text.secondary", lineHeight: 1.5 }}>
+                    {t("pillar4Desc")}
                   </Typography>
                 </CardContent>
               </Card>

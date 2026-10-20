@@ -8,22 +8,20 @@ import {
   Divider,
   List,
   ListItem,
-  Chip,
-  Alert,
-  TextField
+  Chip
 } from "@mui/material";
 import {
   X,
   Trash2,
   Plus,
   Minus,
-  ShieldAlert,
   Clock,
   MapPin,
   CheckCircle2,
   Lock
 } from "lucide-react";
 import { useCart } from "../context/CartContext.js";
+import { useLanguage } from "../context/LanguageContext.js";
 
 export const CartDrawer: React.FC = () => {
   const {
@@ -41,6 +39,7 @@ export const CartDrawer: React.FC = () => {
     selectedDepot
   } = useCart();
 
+  const { t } = useLanguage();
   const [reservationPlaced, setReservationPlaced] = useState(false);
   const [pickupOtp, setPickupOtp] = useState<string | null>(null);
 
@@ -66,23 +65,23 @@ export const CartDrawer: React.FC = () => {
       PaperProps={{
         sx: {
           width: { xs: "100%", sm: 440 },
-          backgroundColor: "#0d1322",
-          color: "#f8fafc",
-          borderLeft: "1px solid rgba(255, 255, 255, 0.08)",
+          backgroundColor: "background.paper",
+          color: "text.primary",
+          borderLeft: (theme) => `1px solid ${theme.palette.divider}`,
           display: "flex",
           flexDirection: "column"
         }
       }}
     >
       {/* Header */}
-      <Box sx={{ p: 2.5, display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid rgba(255, 255, 255, 0.08)" }}>
+      <Box sx={{ p: 2.5, display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: (theme) => `1px solid ${theme.palette.divider}` }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Typography variant="h6" sx={{ fontWeight: 800, fontFamily: "'Outfit', sans-serif" }}>
-            Depot Collection Cart
+          <Typography variant="h6" sx={{ fontWeight: 800, fontFamily: "'Outfit', 'Noto Sans Tamil', sans-serif" }}>
+            {t("depotCartTitle")}
           </Typography>
-          <Chip label={`${itemCount} items`} size="small" sx={{ backgroundColor: "rgba(245, 158, 11, 0.2)", color: "#f59e0b", fontWeight: 700, fontSize: "0.7rem" }} />
+          <Chip label={`${itemCount} ${t("itemsCountSuffix")}`} size="small" sx={{ backgroundColor: "rgba(245, 158, 11, 0.2)", color: "primary.main", fontWeight: 700, fontSize: "0.7rem" }} />
         </Box>
-        <IconButton onClick={() => setIsCartOpen(false)} sx={{ color: "#94a3b8" }}>
+        <IconButton onClick={() => setIsCartOpen(false)} sx={{ color: "text.secondary" }}>
           <X size={20} />
         </IconButton>
       </Box>
@@ -108,50 +107,50 @@ export const CartDrawer: React.FC = () => {
             <CheckCircle2 size={40} />
           </Box>
 
-          <Typography variant="h5" sx={{ fontWeight: 800, fontFamily: "'Outfit', sans-serif", mb: 1, color: "#f8fafc" }}>
-            Depot Reservation Held!
+          <Typography variant="h5" sx={{ fontWeight: 800, fontFamily: "'Outfit', 'Noto Sans Tamil', sans-serif", mb: 1, color: "text.primary" }}>
+            {t("reservationHeldTitle")}
           </Typography>
 
-          <Typography variant="body2" sx={{ color: "#94a3b8", mb: 3 }}>
-            Your inventory is atomically locked for 15 minutes at the licensed depot. No overselling guaranteed.
+          <Typography variant="body2" sx={{ color: "text.secondary", mb: 3 }}>
+            {t("reservationHeldDesc")}
           </Typography>
 
           {/* Secure Collection PIN */}
           <Box
             sx={{
-              backgroundColor: "rgba(245, 158, 11, 0.08)",
+              backgroundColor: (theme) => (theme.palette.mode === "dark" ? "rgba(245, 158, 11, 0.08)" : "rgba(245, 158, 11, 0.12)"),
               border: "1px dashed #f59e0b",
               borderRadius: "12px",
               p: 2.5,
               mb: 3
             }}
           >
-            <Typography variant="caption" sx={{ color: "#f59e0b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              Collection OTP / Verification PIN
+            <Typography variant="caption" sx={{ color: "primary.main", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              {t("collectionOtpLabel")}
             </Typography>
-            <Typography variant="h3" sx={{ fontWeight: 900, letterSpacing: "0.15em", color: "#fbbf24", my: 1, fontFamily: "monospace" }}>
+            <Typography variant="h3" sx={{ fontWeight: 900, letterSpacing: "0.15em", color: "primary.main", my: 1, fontFamily: "monospace" }}>
               {pickupOtp}
             </Typography>
-            <Typography variant="caption" sx={{ color: "#cbd5e1", fontSize: "0.72rem" }}>
-              Present this PIN + Physical Govt Photo ID (18+) at the collection counter.
+            <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "0.72rem" }}>
+              {t("collectionInstructions")}
             </Typography>
           </Box>
 
           {/* Depot Details */}
-          <Box sx={{ textAlign: "left", backgroundColor: "rgba(255, 255, 255, 0.03)", p: 2, borderRadius: "10px", mb: 3 }}>
+          <Box sx={{ textAlign: "left", backgroundColor: (theme) => (theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.03)" : "rgba(0, 0, 0, 0.02)"), p: 2, borderRadius: "10px", mb: 3, border: (theme) => `1px solid ${theme.palette.divider}` }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
               <MapPin size={16} color="#f59e0b" />
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#f8fafc" }}>
-                Collection Hub
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "text.primary" }}>
+                {t("collectionHubLabel")}
               </Typography>
             </Box>
-            <Typography variant="body2" sx={{ color: "#94a3b8", fontSize: "0.8rem" }}>
+            <Typography variant="body2" sx={{ color: "text.secondary", fontSize: "0.8rem" }}>
               {selectedDepot}
             </Typography>
           </Box>
 
           <Button variant="contained" color="primary" fullWidth onClick={handleReset}>
-            Done & Return to Store
+            {t("doneAndReturn")}
           </Button>
         </Box>
       ) : (
@@ -169,8 +168,8 @@ export const CartDrawer: React.FC = () => {
             }}
           >
             <Clock size={16} color="#10b981" />
-            <Typography variant="caption" sx={{ color: "#34d399", fontWeight: 600, fontSize: "0.75rem" }}>
-              15-Min Atomic Inventory Lock active once checkout begins
+            <Typography variant="caption" sx={{ color: "secondary.main", fontWeight: 600, fontSize: "0.75rem" }}>
+              {t("reservationActiveNotice")}
             </Typography>
           </Box>
 
@@ -179,14 +178,14 @@ export const CartDrawer: React.FC = () => {
             {items.length === 0 ? (
               <Box sx={{ textAlign: "center", py: 8 }}>
                 <Box sx={{ fontSize: "3rem", mb: 1.5 }}>🛒</Box>
-                <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: "#cbd5e1" }}>
-                  Your Depot Cart is Empty
+                <Typography variant="h6" sx={{ fontWeight: 700, mb: 1, color: "text.primary", fontFamily: "'Outfit', 'Noto Sans Tamil', sans-serif" }}>
+                  {t("emptyCartTitle")}
                 </Typography>
-                <Typography variant="body2" sx={{ color: "#64748b", maxWidth: 260, mx: "auto", mb: 3 }}>
-                  Select CSIR-NEERI certified Green Crackers to reserve at your nearest licensed depot.
+                <Typography variant="body2" sx={{ color: "text.secondary", maxWidth: 280, mx: "auto", mb: 3 }}>
+                  {t("emptyCartDesc")}
                 </Typography>
                 <Button variant="outlined" color="primary" onClick={() => setIsCartOpen(false)}>
-                  Browse Green Catalog
+                  {t("browseCatalogBtn")}
                 </Button>
               </Box>
             ) : (
@@ -200,7 +199,7 @@ export const CartDrawer: React.FC = () => {
                       alignItems: "center",
                       gap: 2,
                       py: 1.8,
-                      borderBottom: "1px solid rgba(255, 255, 255, 0.06)"
+                      borderBottom: (theme) => `1px solid ${theme.palette.divider}`
                     }}
                   >
                     <Box
@@ -212,28 +211,28 @@ export const CartDrawer: React.FC = () => {
                         height: 64,
                         borderRadius: "8px",
                         objectFit: "cover",
-                        backgroundColor: "#1e293b"
+                        backgroundColor: "background.default"
                       }}
                     />
 
                     <Box sx={{ flexGrow: 1, minWidth: 0 }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#f8fafc", lineHeight: 1.2, mb: 0.4 }} noWrap>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "text.primary", lineHeight: 1.2, mb: 0.4 }} noWrap>
                         {product.name}
                       </Typography>
-                      <Typography variant="caption" sx={{ color: "#10b981", fontWeight: 600, display: "block" }}>
+                      <Typography variant="caption" sx={{ color: "secondary.main", fontWeight: 600, display: "block" }}>
                         ₹{product.salePrice.toFixed(0)} each
                       </Typography>
 
                       {/* Quantity Controls */}
                       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
-                        <Box sx={{ display: "flex", alignItems: "center", backgroundColor: "rgba(255, 255, 255, 0.06)", borderRadius: "6px" }}>
-                          <IconButton size="small" onClick={() => updateQuantity(product.id, quantity - 1)} sx={{ color: "#cbd5e1", p: 0.5 }}>
+                        <Box sx={{ display: "flex", alignItems: "center", backgroundColor: (theme) => (theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.04)"), borderRadius: "6px" }}>
+                          <IconButton size="small" onClick={() => updateQuantity(product.id, quantity - 1)} sx={{ color: "text.secondary", p: 0.5 }}>
                             <Minus size={14} />
                           </IconButton>
                           <Typography variant="caption" sx={{ px: 1, fontWeight: 700, minWidth: 20, textAlign: "center" }}>
                             {quantity}
                           </Typography>
-                          <IconButton size="small" onClick={() => updateQuantity(product.id, quantity + 1)} sx={{ color: "#cbd5e1", p: 0.5 }}>
+                          <IconButton size="small" onClick={() => updateQuantity(product.id, quantity + 1)} sx={{ color: "text.secondary", p: 0.5 }}>
                             <Plus size={14} />
                           </IconButton>
                         </Box>
@@ -251,30 +250,30 @@ export const CartDrawer: React.FC = () => {
 
           {/* Footer Checkout Summary */}
           {items.length > 0 && (
-            <Box sx={{ p: 2.5, backgroundColor: "#0b0f1a", borderTop: "1px solid rgba(255, 255, 255, 0.08)" }}>
+            <Box sx={{ p: 2.5, backgroundColor: (theme) => (theme.palette.mode === "dark" ? "#0b0f1a" : "#f1f5f9"), borderTop: (theme) => `1px solid ${theme.palette.divider}` }}>
               {/* Statutory Fee Breakdown */}
               <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.8 }}>
-                <Typography variant="body2" sx={{ color: "#94a3b8" }}>Items Subtotal</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 600, color: "#f8fafc" }}>₹{subtotal.toFixed(2)}</Typography>
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>{t("itemsSubtotal")}</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>₹{subtotal.toFixed(2)}</Typography>
               </Box>
 
               <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.8 }}>
-                <Typography variant="body2" sx={{ color: "#94a3b8", display: "flex", alignItems: "center", gap: 0.5 }}>
-                  PESO Packaging & Handling Fee
+                <Typography variant="body2" sx={{ color: "text.secondary", display: "flex", alignItems: "center", gap: 0.5 }}>
+                  {t("pesoPackagingFee")}
                 </Typography>
-                <Typography variant="body2" sx={{ fontWeight: 600, color: "#f59e0b" }}>₹{complianceFee.toFixed(2)}</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: "primary.main" }}>₹{complianceFee.toFixed(2)}</Typography>
               </Box>
 
               <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1.2 }}>
-                <Typography variant="body2" sx={{ color: "#94a3b8" }}>Applicable GST (18%)</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 600, color: "#f8fafc" }}>₹{gstAmount.toFixed(2)}</Typography>
+                <Typography variant="body2" sx={{ color: "text.secondary" }}>{t("gstTax")}</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>₹{gstAmount.toFixed(2)}</Typography>
               </Box>
 
-              <Divider sx={{ borderColor: "rgba(255, 255, 255, 0.08)", my: 1.5 }} />
+              <Divider sx={{ borderColor: (theme) => theme.palette.divider, my: 1.5 }} />
 
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", mb: 2 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "#f8fafc" }}>Total Amount</Typography>
-                <Typography variant="h5" sx={{ fontWeight: 900, color: "#fbbf24", fontFamily: "'Outfit', sans-serif" }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 700, color: "text.primary" }}>{t("totalAmount")}</Typography>
+                <Typography variant="h5" sx={{ fontWeight: 900, color: "primary.main", fontFamily: "'Outfit', sans-serif" }}>
                   ₹{totalAmount.toFixed(2)}
                 </Typography>
               </Box>
@@ -292,7 +291,7 @@ export const CartDrawer: React.FC = () => {
                   fontWeight: 800
                 }}
               >
-                Reserve at Licensed Depot
+                {t("reserveAtDepotBtn")}
               </Button>
             </Box>
           )}

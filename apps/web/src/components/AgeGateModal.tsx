@@ -12,6 +12,7 @@ import {
   Alert
 } from "@mui/material";
 import { ShieldAlert, CheckCircle, Scale } from "lucide-react";
+import { useLanguage } from "../context/LanguageContext.js";
 
 interface AgeGateModalProps {
   open: boolean;
@@ -24,6 +25,7 @@ export const AgeGateModal: React.FC<AgeGateModalProps> = ({
   onClose,
   onVerified
 }) => {
+  const { t } = useLanguage();
   const [agreed18, setAgreed18] = useState(true);
   const [agreedDepot, setAgreedDepot] = useState(true);
 
@@ -42,11 +44,11 @@ export const AgeGateModal: React.FC<AgeGateModalProps> = ({
       fullWidth
       PaperProps={{
         sx: {
-          backgroundColor: "#0d1322",
-          color: "#f8fafc",
+          backgroundColor: "background.paper",
+          color: "text.primary",
           borderRadius: "16px",
-          border: "1px solid rgba(245, 158, 11, 0.3)",
-          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.7)"
+          border: (theme) => `1px solid ${theme.palette.divider}`,
+          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)"
         }
       }}
     >
@@ -57,7 +59,7 @@ export const AgeGateModal: React.FC<AgeGateModalProps> = ({
             height: 44,
             borderRadius: "10px",
             backgroundColor: "rgba(245, 158, 11, 0.15)",
-            color: "#f59e0b",
+            color: "primary.main",
             display: "flex",
             alignItems: "center",
             justifyContent: "center"
@@ -66,11 +68,11 @@ export const AgeGateModal: React.FC<AgeGateModalProps> = ({
           <Scale size={24} />
         </Box>
         <Box>
-          <Typography variant="h6" sx={{ fontWeight: 800, fontFamily: "'Outfit', sans-serif" }}>
-            Statutory Age Verification
+          <Typography variant="h6" sx={{ fontWeight: 800, fontFamily: "'Outfit', 'Noto Sans Tamil', sans-serif" }}>
+            {t("ageGateTitle")}
           </Typography>
-          <Typography variant="caption" sx={{ color: "#94a3b8" }}>
-            The Explosives Act (1884) & Explosives Rules (2008)
+          <Typography variant="caption" sx={{ color: "text.secondary" }}>
+            {t("ageGateAct")}
           </Typography>
         </Box>
       </DialogTitle>
@@ -81,17 +83,17 @@ export const AgeGateModal: React.FC<AgeGateModalProps> = ({
           icon={<ShieldAlert size={20} />}
           sx={{
             backgroundColor: "rgba(245, 158, 11, 0.1)",
-            color: "#fbbf24",
-            border: "1px solid rgba(245, 158, 11, 0.25)",
+            color: "primary.main",
+            border: (theme) => `1px solid ${theme.palette.divider}`,
             mb: 2.5,
-            "& .MuiAlert-icon": { color: "#f59e0b" }
+            "& .MuiAlert-icon": { color: "primary.main" }
           }}
         >
-          Selling, delivering, or supplying fireworks to persons under <strong>18 years of age</strong> is strictly prohibited by law in India.
+          {t("ageGateAlert")}
         </Alert>
 
-        <Typography variant="body2" sx={{ color: "#cbd5e1", mb: 2, lineHeight: 1.6 }}>
-          All purchases on this platform are fulfilled through licensed <strong>Click-and-Collect Depots</strong> or verified PESO transport. You will be required to present valid Government Photo Identification (Aadhaar, Voter ID, Driving License) upon physical collection.
+        <Typography variant="body2" sx={{ color: "text.secondary", mb: 2, lineHeight: 1.6 }}>
+          {t("ageGateText")}
         </Typography>
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1, my: 2 }}>
@@ -100,12 +102,12 @@ export const AgeGateModal: React.FC<AgeGateModalProps> = ({
               <Checkbox
                 checked={agreed18}
                 onChange={(e) => setAgreed18(e.target.checked)}
-                sx={{ color: "#f59e0b", "&.Mui-checked": { color: "#f59e0b" } }}
+                sx={{ color: "primary.main", "&.Mui-checked": { color: "primary.main" } }}
               />
             }
             label={
-              <Typography variant="body2" sx={{ color: "#f8fafc", fontWeight: 500 }}>
-                I hereby declare that I am <strong>18 years of age or older</strong>.
+              <Typography variant="body2" sx={{ color: "text.primary", fontWeight: 500 }}>
+                {t("ageGateCheck1")}
               </Typography>
             }
           />
@@ -115,12 +117,12 @@ export const AgeGateModal: React.FC<AgeGateModalProps> = ({
               <Checkbox
                 checked={agreedDepot}
                 onChange={(e) => setAgreedDepot(e.target.checked)}
-                sx={{ color: "#f59e0b", "&.Mui-checked": { color: "#f59e0b" } }}
+                sx={{ color: "primary.main", "&.Mui-checked": { color: "primary.main" } }}
               />
             }
             label={
-              <Typography variant="body2" sx={{ color: "#f8fafc", fontWeight: 500 }}>
-                I understand that collection requires physical verification at an authorized PESO godown.
+              <Typography variant="body2" sx={{ color: "text.primary", fontWeight: 500 }}>
+                {t("ageGateCheck2")}
               </Typography>
             }
           />
@@ -137,7 +139,7 @@ export const AgeGateModal: React.FC<AgeGateModalProps> = ({
           startIcon={<CheckCircle size={18} />}
           sx={{ py: 1.2, fontWeight: 700 }}
         >
-          Confirm Age & Continue
+          {t("ageGateConfirmBtn")}
         </Button>
       </DialogActions>
     </Dialog>

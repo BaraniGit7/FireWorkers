@@ -6,12 +6,12 @@ import {
   Typography,
   Box,
   Button,
-  Chip,
-  Tooltip
+  Chip
 } from "@mui/material";
 import { ShieldCheck, Volume2, Plus, Check, Info } from "lucide-react";
 import { DemoProduct } from "../api/client.js";
 import { useCart } from "../context/CartContext.js";
+import { useLanguage } from "../context/LanguageContext.js";
 
 interface ProductCardProps {
   product: DemoProduct;
@@ -19,6 +19,7 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addToCart } = useCart();
+  const { t } = useLanguage();
   const [added, setAdded] = useState(false);
 
   const handleAdd = () => {
@@ -56,7 +57,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       >
         <Chip
           icon={<ShieldCheck size={14} color="#10b981" />}
-          label="CSIR-NEERI Green"
+          label={t("csirNeeriGreen")}
           size="small"
           sx={{
             backgroundColor: "rgba(16, 185, 129, 0.9)",
@@ -82,7 +83,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       </Box>
 
       {/* Product Image */}
-      <Box sx={{ position: "relative", pt: "75%", overflow: "hidden", backgroundColor: "#0f172a" }}>
+      <Box sx={{ position: "relative", pt: "75%", overflow: "hidden", backgroundColor: "background.default" }}>
         <CardMedia
           component="img"
           image={product.image}
@@ -106,14 +107,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       <CardContent sx={{ flexGrow: 1, display: "flex", flexDirection: "column", p: 2.2 }}>
         {/* Category & Sound cap */}
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
-          <Typography variant="caption" sx={{ color: "#f59e0b", fontWeight: 700, textTransform: "uppercase", fontSize: "0.7rem" }}>
+          <Typography variant="caption" sx={{ color: "primary.main", fontWeight: 700, textTransform: "uppercase", fontSize: "0.7rem" }}>
             {product.category}
           </Typography>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
             <Volume2 size={13} color="#94a3b8" />
-            <Typography variant="caption" sx={{ color: "#94a3b8", fontWeight: 600, fontSize: "0.7rem" }}>
-              {product.decibelRating === 0 ? "Silent (<0 dB)" : `${product.decibelRating} dB`}
+            <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600, fontSize: "0.7rem" }}>
+              {product.decibelRating === 0 ? t("silentRating") : `${product.decibelRating} dB`}
             </Typography>
           </Box>
         </Box>
@@ -123,10 +124,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           variant="subtitle1"
           sx={{
             fontWeight: 700,
-            fontFamily: "'Outfit', sans-serif",
+            fontFamily: "'Outfit', 'Noto Sans Tamil', sans-serif",
             lineHeight: 1.3,
             mb: 1,
-            color: "#f8fafc",
+            color: "text.primary",
             minHeight: "2.6em",
             display: "-webkit-box",
             WebkitLineClamp: 2,
@@ -140,8 +141,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         {/* Chemical Formulation / Barium-free statement */}
         <Box
           sx={{
-            backgroundColor: "rgba(255, 255, 255, 0.03)",
-            border: "1px dashed rgba(255, 255, 255, 0.1)",
+            backgroundColor: (theme) => (theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.03)" : "rgba(0, 0, 0, 0.02)"),
+            border: (theme) => `1px dashed ${theme.palette.divider}`,
             borderRadius: "8px",
             p: 1,
             mb: 1.5,
@@ -151,8 +152,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           }}
         >
           <Info size={14} color="#10b981" style={{ marginTop: 2, flexShrink: 0 }} />
-          <Typography variant="caption" sx={{ color: "#cbd5e1", fontSize: "0.68rem", lineHeight: 1.25 }}>
-            <strong>Cert #{product.neeriCertNumber}</strong> • Barium-Free formulation verified.
+          <Typography variant="caption" sx={{ color: "text.secondary", fontSize: "0.68rem", lineHeight: 1.25 }}>
+            <strong>{t("certPrefix")}{product.neeriCertNumber}</strong> • {t("bariumVerified")}
           </Typography>
         </Box>
 
@@ -160,18 +161,18 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <Box sx={{ mt: "auto" }} />
 
         {/* Price & Action */}
-        <Box sx={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", pt: 1, borderTop: "1px solid rgba(255, 255, 255, 0.06)" }}>
+        <Box sx={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", pt: 1, borderTop: (theme) => `1px solid ${theme.palette.divider}` }}>
           <Box>
             <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.8 }}>
-              <Typography variant="h6" sx={{ fontWeight: 800, color: "#f59e0b", fontFamily: "'Outfit', sans-serif" }}>
+              <Typography variant="h6" sx={{ fontWeight: 800, color: "primary.main", fontFamily: "'Outfit', sans-serif" }}>
                 ₹{product.salePrice.toFixed(0)}
               </Typography>
-              <Typography variant="body2" sx={{ color: "#64748b", textDecoration: "line-through", fontSize: "0.8rem" }}>
+              <Typography variant="body2" sx={{ color: "text.secondary", textDecoration: "line-through", fontSize: "0.8rem" }}>
                 ₹{product.basePrice.toFixed(0)}
               </Typography>
             </Box>
-            <Typography variant="caption" sx={{ color: "#10b981", fontSize: "0.65rem", display: "block" }}>
-              In Stock ({product.stockQuantity} avail)
+            <Typography variant="caption" sx={{ color: "secondary.main", fontSize: "0.65rem", display: "block", fontWeight: 600 }}>
+              {t("inStock")} ({product.stockQuantity} {t("available")})
             </Typography>
           </Box>
 
@@ -189,7 +190,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               fontWeight: 700
             }}
           >
-            {added ? "Added" : "Add"}
+            {added ? t("addedBtn") : t("addBtn")}
           </Button>
         </Box>
       </CardContent>

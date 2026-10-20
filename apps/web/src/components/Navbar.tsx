@@ -8,10 +8,25 @@ import {
   IconButton,
   Badge,
   Container,
-  Chip
+  Chip,
+  Tooltip
 } from "@mui/material";
-import { ShoppingBag, ShieldCheck, MapPin, Sparkles, AlertTriangle } from "lucide-react";
+import {
+  ShoppingBag,
+  ShieldCheck,
+  MapPin,
+  Sparkles,
+  Sun,
+  Moon,
+  LogIn,
+  LogOut,
+  UserCheck,
+  Languages
+} from "lucide-react";
 import { useCart } from "../context/CartContext.js";
+import { useThemeMode } from "../context/ThemeContext.js";
+import { useAuth } from "../context/AuthContext.js";
+import { useLanguage } from "../context/LanguageContext.js";
 
 interface NavbarProps {
   onOpenAgeGate: () => void;
@@ -24,24 +39,32 @@ export const Navbar: React.FC<NavbarProps> = ({
   searchTerm,
   onSearchChange
 }) => {
-  const { itemCount, setIsCartOpen, selectedDepot } = useCart();
+  const { itemCount, setIsCartOpen } = useCart();
+  const { mode, toggleTheme } = useThemeMode();
+  const { user, isAuthenticated, logout, openAuthModal } = useAuth();
+  const { language, toggleLanguage, t } = useLanguage();
+
+  const isDark = mode === "dark";
 
   return (
     <AppBar
       position="sticky"
       sx={{
-        backgroundColor: "rgba(10, 15, 29, 0.85)",
+        backgroundColor: isDark ? "rgba(10, 15, 29, 0.85)" : "rgba(255, 255, 255, 0.88)",
         backdropFilter: "blur(16px)",
-        borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-        boxShadow: "0 4px 30px rgba(0, 0, 0, 0.5)",
+        borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+        boxShadow: isDark
+          ? "0 4px 30px rgba(0, 0, 0, 0.5)"
+          : "0 4px 20px rgba(0, 0, 0, 0.06)",
+        color: "text.primary",
         zIndex: 1100
       }}
     >
       {/* Statutory Regulatory Banner */}
       <Box
         sx={{
-          backgroundColor: "rgba(245, 158, 11, 0.12)",
-          borderBottom: "1px solid rgba(245, 158, 11, 0.25)",
+          backgroundColor: isDark ? "rgba(245, 158, 11, 0.12)" : "rgba(245, 158, 11, 0.18)",
+          borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
           py: 0.6,
           px: 2,
           display: "flex",
@@ -49,23 +72,21 @@ export const Navbar: React.FC<NavbarProps> = ({
           justifyContent: "center",
           gap: 1.5,
           fontSize: "0.78rem",
-          color: "#fbbf24",
-          fontWeight: 500,
+          color: isDark ? "#fbbf24" : "#b45309",
+          fontWeight: 600,
           textAlign: "center"
         }}
       >
         <ShieldCheck size={14} color="#10b981" />
-        <span>
-          <strong>PESO & Explosives Act (1884) Compliant</strong> • CSIR-NEERI Certified Green Crackers (&lt;125 dB) • Authorized Depot Pickup Only
-        </span>
+        <span>{t("regulatoryBanner")}</span>
         <Chip
-          label="Barium-Free"
+          label={t("bariumFree")}
           size="small"
           sx={{
             height: 18,
             fontSize: "0.65rem",
-            backgroundColor: "rgba(16, 185, 129, 0.2)",
-            color: "#34d399",
+            backgroundColor: isDark ? "rgba(16, 185, 129, 0.2)" : "rgba(16, 185, 129, 0.15)",
+            color: isDark ? "#34d399" : "#047857",
             fontWeight: 700
           }}
         />
@@ -97,7 +118,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                 sx={{
                   fontWeight: 800,
                   fontFamily: "'Outfit', sans-serif",
-                  background: "linear-gradient(90deg, #fbbf24 0%, #f97316 100%)",
+                  background: isDark
+                    ? "linear-gradient(90deg, #fbbf24 0%, #f97316 100%)"
+                    : "linear-gradient(90deg, #d97706 0%, #ea580c 100%)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   lineHeight: 1.1
@@ -108,7 +131,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <Typography
                 variant="caption"
                 sx={{
-                  color: "#94a3b8",
+                  color: "text.secondary",
                   fontSize: "0.68rem",
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
@@ -118,7 +141,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   gap: 0.5
                 }}
               >
-                <Sparkles size={10} color="#10b981" /> Licensed Marketplace
+                <Sparkles size={10} color="#10b981" /> {t("marketplaceSubtitle")}
               </Typography>
             </Box>
           </Box>
@@ -126,49 +149,128 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Depot Location Badge */}
           <Box
             sx={{
-              display: { xs: "none", md: "flex" },
+              display: { xs: "none", lg: "flex" },
               alignItems: "center",
               gap: 1,
-              backgroundColor: "rgba(255, 255, 255, 0.04)",
-              border: "1px solid rgba(255, 255, 255, 0.08)",
+              backgroundColor: isDark ? "rgba(255, 255, 255, 0.04)" : "rgba(0, 0, 0, 0.03)",
+              border: (theme) => `1px solid ${theme.palette.divider}`,
               borderRadius: "10px",
               px: 2,
-              py: 0.8,
-              cursor: "pointer"
+              py: 0.8
             }}
           >
             <MapPin size={16} color="#f59e0b" />
             <Box>
-              <Typography variant="caption" sx={{ color: "#94a3b8", display: "block", fontSize: "0.65rem", lineHeight: 1 }}>
-                Depot Collection Hub
+              <Typography variant="caption" sx={{ color: "text.secondary", display: "block", fontSize: "0.65rem", lineHeight: 1 }}>
+                {t("depotCollectionHub")}
               </Typography>
-              <Typography variant="body2" sx={{ color: "#f8fafc", fontWeight: 600, fontSize: "0.8rem" }}>
-                Gurugram 122001 (Form LE-5 Approved)
+              <Typography variant="body2" sx={{ color: "text.primary", fontWeight: 600, fontSize: "0.8rem" }}>
+                {t("depotLocation")}
               </Typography>
             </Box>
           </Box>
 
-          {/* Right Actions: Age Gate, Status & Cart */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          {/* Right Actions: Language Switcher, Theme Toggle, Auth, Age Gate & Cart */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            {/* Language Switcher Button (English / தமிழ்) */}
+            <Tooltip title={language === "en" ? "தமிழுக்கு மாற்றுக" : "Switch to English"}>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={toggleLanguage}
+                startIcon={<Languages size={15} color="#f59e0b" />}
+                sx={{
+                  borderColor: (theme) => theme.palette.divider,
+                  color: "text.primary",
+                  fontSize: "0.78rem",
+                  fontWeight: 700,
+                  px: 1.5,
+                  minWidth: "auto",
+                  borderRadius: "9px"
+                }}
+              >
+                {language === "en" ? "தமிழ்" : "EN"}
+              </Button>
+            </Tooltip>
+
+            {/* Theme Switcher Button */}
+            <Tooltip title={isDark ? t("switchThemeLight") : t("switchThemeDark")}>
+              <IconButton
+                onClick={toggleTheme}
+                sx={{
+                  backgroundColor: isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.04)",
+                  border: (theme) => `1px solid ${theme.palette.divider}`,
+                  color: isDark ? "#fbbf24" : "#475569",
+                  "&:hover": {
+                    backgroundColor: isDark ? "rgba(255, 255, 255, 0.12)" : "rgba(0, 0, 0, 0.08)"
+                  }
+                }}
+              >
+                {isDark ? <Sun size={17} /> : <Moon size={17} />}
+              </IconButton>
+            </Tooltip>
+
+            {/* Statutory Age Gate Button */}
             <Button
               variant="outlined"
               size="small"
               onClick={onOpenAgeGate}
               startIcon={<ShieldCheck size={16} color="#10b981" />}
               sx={{
-                borderColor: "rgba(16, 185, 129, 0.3)",
-                color: "#34d399",
+                borderColor: "rgba(16, 185, 129, 0.35)",
+                color: isDark ? "#34d399" : "#059669",
                 fontSize: "0.75rem",
                 display: { xs: "none", sm: "flex" },
                 "&:hover": {
                   borderColor: "#10b981",
-                  backgroundColor: "rgba(16, 185, 129, 0.1)"
+                  backgroundColor: "rgba(16, 185, 129, 0.08)"
                 }
               }}
             >
-              18+ Verified
+              {t("ageVerifiedBtn")}
             </Button>
 
+            {/* Authentication Button & User Profile */}
+            {isAuthenticated && user ? (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Chip
+                  icon={<UserCheck size={14} color="#10b981" />}
+                  label={`${user.fullName.split(" ")[0]} (${user.role})`}
+                  size="small"
+                  sx={{
+                    fontWeight: 700,
+                    backgroundColor: isDark ? "rgba(245, 158, 11, 0.15)" : "rgba(217, 119, 6, 0.12)",
+                    color: isDark ? "#f59e0b" : "#b45309",
+                    border: (theme) => `1px solid ${theme.palette.divider}`
+                  }}
+                />
+                <Tooltip title={t("signOut")}>
+                  <IconButton onClick={logout} size="small" sx={{ color: "error.main" }}>
+                    <LogOut size={16} />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            ) : (
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => openAuthModal("login")}
+                startIcon={<LogIn size={16} />}
+                sx={{
+                  borderColor: (theme) => theme.palette.divider,
+                  color: "text.primary",
+                  fontSize: "0.8rem",
+                  "&:hover": {
+                    borderColor: "primary.main",
+                    backgroundColor: "rgba(245, 158, 11, 0.08)"
+                  }
+                }}
+              >
+                {t("signIn")}
+              </Button>
+            )}
+
+            {/* Cart Drawer Trigger */}
             <Button
               variant="contained"
               color="primary"
@@ -178,9 +280,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <ShoppingBag size={18} />
                 </Badge>
               }
-              sx={{ px: { xs: 2, sm: 2.5 } }}
+              sx={{ px: { xs: 1.8, sm: 2.2 } }}
             >
-              Depot Cart
+              {t("cart")}
             </Button>
           </Box>
         </Toolbar>
